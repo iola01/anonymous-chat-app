@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Anonymous Chat</title>
+  <style>
+    body { font-family: sans-serif; background: #121212; color: white; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
+    #chat { display: none; flex-direction: column; width: 90%; max-width: 500px; border: 1px solid #333; padding: 1rem; border-radius: 10px; background: #1e1e1e; }
+    #messages { height: 300px; overflow-y: scroll; margin-bottom: 1rem; border: 1px solid #555; padding: 0.5rem; }
+    input, select { margin-bottom: 1rem; padding: 0.5rem; border-radius: 5px; border: none; width: 100%; }
+  </style>
+</head>
+<body>
+
+  <h1>🌍 Anonymous Chat</h1>
+
+  <div id="setup">
+    <select id="language">
+      <option value="English">English</option>
+      <option value="Italian">Italian</option>
+      <option value="Albanian">Albanian</option>
+    </select>
+    <select id="topic">
+      <option value="Life">Life</option>
+      <option value="Love">Love</option>
+      <option value="Sadness">Sadness</option>
+      <option value="World">World</option>
+    </select>
+    <select id="feeling">
+      <option value="Happy">Happy</option>
+      <option value="Lonely">Lonely</option>
+      <option value="Confused">Confused</option>
+      <option value="Angry">Angry</option>
+    </select>
+    <button onclick="startChat()">Start Chat</button>
+  </div>
+
+  <div id="chat">
+    <div id="messages"></div>
+    <input id="input" placeholder="Type your message..." onkeydown="if(event.key==='Enter') sendMessage()" />
+  </div>
+
+  <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+  <script>
+    const socket = io();
+    let chatBox = document.getElementById("chat");
+    let setupBox = document.getElementById("setup");
+    let messages = document.getElementById("messages");
+
+    function startChat() {
+      const language = document.getElementById("language").value;
+      const topic = document.getElementById("topic").value;
+      const feeling = document.getElementById("feeling").value;
+      socket.emit("findPartner", { language, topic, feeling });
+    }
+
+    socket.on("partnerFound", () => {
+      setupBox.style.display = "none";
+      chatBox.style.display = "flex";
+    });
+
+    function sendMessage() {
+      const input = document.getElementById("input");
+      const message = input.value.trim();
+      if (message) {
+        socket.emit("sendMessage", message);
+        appendMessage("You: " + message);
+        input.value = "";
+      }
+    }
+
+    socket.on("receiveMessage", (msg) => {
+      appendMessage("Partner: " + msg);
+    });
+
+    socket.on("partnerDisconnected", () => {
+      appendMessage("*** Partner left. Refresh to start over. ***");
+    });
+
+    function appendMessage(msg) {
+      let div = document.createElement("div");
+      div.innerText = msg;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+</body>
+</html>
