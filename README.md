@@ -63,7 +63,7 @@ The server will run on `http://localhost:3000`. Visit it in your browser to use 
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the Creative Commons Attribution-NonCommercial-NoDerivs 4.0 International.
 
 ## Acknowledgements
 
